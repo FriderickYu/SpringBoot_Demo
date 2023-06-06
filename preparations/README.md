@@ -17,4 +17,31 @@
 
 首先安装`cnpm`: `npm install -g cnpm`, 然后使用这个来安装依赖`cnpm install`
 
-cnpm install --save core-js/modules/es.array.push.js core-js/modules/es.error.cause.js core-js/modules/es.object.proto.js svg-baker-runtime/browser-symbol
+所有的依赖安装完后开始运行开发环境: `npm run dev`
+
+替换端口号,在`vue.config.js`中修改
+
+```js
+const port = process.env.port || process.env.npm_config_port || ???? // 修改成你想要的端口
+```
+
+每次运行开发环境会自动打开浏览器, 烦内, 修改成`open: false;`
+
+关闭语法纠错机制,这样系统就不会在缩进上烦人了, `lintOnSave: false,`
+
+```js
+// lintOnSave: process.env.NODE_ENV === 'development',
+  lintOnSave: false,
+  productionSourceMap: false,
+  devServer: {
+    port: port,
+    open: false,
+    overlay: {
+      warnings: false,
+      errors: true
+    },
+    before: require('./mock/mock-server.js')
+  },
+```
+在`src\settings.js`目录下可以修改title
+
