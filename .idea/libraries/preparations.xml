@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="preparations">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/preparations/vue-admin-template-4.4.0.zip!/" />
+      <root url="jar://$PROJECT_DIR$/preparations/Redis-x64-3.2.100.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
