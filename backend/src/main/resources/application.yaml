@@ -1,0 +1,15 @@
+server:
+  port: 9999
+
+spring:
+  datasource:
+    username: root
+    password: 194466
+    url: jdbc:mysql:///demo_db
+  redis:
+    port: 6379
+    host: localhost
+
+logging:
+  level:
+    org.ytq: debug

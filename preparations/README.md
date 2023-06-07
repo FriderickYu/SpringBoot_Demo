@@ -45,3 +45,23 @@ const port = process.env.port || process.env.npm_config_port || ???? // 修改�
 ```
 
 在`src\settings.js`目录下可以修改title
+
+## SpringBoot环境
+
+JDK版本: 1.8
+
+SpringBoot框架版本: 2.7.8
+
+所需依赖:
+
+* `spring-boot-starter-web`
+* `mysql-connector-j`
+* `mybatis-plus-boot-starter`, 版本: 3.5.2
+* `mybatis-plus-generator`, 版本: 3.5.2
+* `freemarker`
+* `lombok`
+* `pring-boot-starter-data-redis`
+* `spring-boot-starter`
+* `spring-boot-starter-test`
+* `fastjson2`, 版本: 2.0.7
+* `spring-security-core`
