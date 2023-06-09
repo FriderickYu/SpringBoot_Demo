@@ -39,4 +39,20 @@ public class UserController {
         return Encapulation.fail(20002, "用户名或密码错误");
     }
 
+    @GetMapping("/info")
+    public Encapulation<Map<String, Object>> getUserInfo(@RequestParam("token") String token){
+        // 根据token获取用户信息
+        Map<String, Object> data = userService.getUserInfo(token);
+        if(data != null){
+            return Encapulation.success(data);
+        }
+        return Encapulation.fail(20003, "登录信息无效，请重新登录");
+    }
+
+    @PostMapping("/logout")
+    public Encapulation<?> logout(@RequestHeader("X-Token") String token){
+        userService.logout(token);
+        return Encapulation.success();
+    }
+
 }
