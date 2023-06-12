@@ -2,6 +2,7 @@
 
 前端端口号: 8888
 后端端口号: 9999
+
 ## 接口: 登录
 
 URL: user/login
@@ -14,20 +15,22 @@ Request Body Sample:
 {username: "admin", password: "111111"}
 ```
 
-Response Body Sample: 
+Response Body Sample:
+
 ```json
 {"code":20000,
   "data":
   {"token":"admin-token"}
 }
 ```
+
 ## 接口: 用户登录后根据token值获得对应信息
 
 URL: user/info?token=???
 
 METHOD: GET
 
-Parameter Sample: 
+Parameter Sample:
 
 ```json
 user/info?token=admin-token
@@ -35,6 +38,7 @@ token=admin-token
 ```
 
 Response Body Sample:
+
 ```json
 {
   "code": 20000,
@@ -56,6 +60,7 @@ URL: user/logout
 METHOD: POST
 
 Response Body Sample:
+
 ```json
 {"code":20000,
   "data":"success"
