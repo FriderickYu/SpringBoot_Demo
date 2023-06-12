@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.ytq.sys.entity.User;
 import org.ytq.sys.mapper.UserMapper;
 import org.ytq.sys.service.IUserService;
@@ -28,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     // 用户登录具体的逻辑
     @Override
     public Map<String, Object> login(User user) {
@@ -35,10 +38,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 根据用户名和密码查询
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, user.getUsername());
-        wrapper.eq(User::getPassword, user.getPassword());
         User loginUser = this.baseMapper.selectOne(wrapper);
+        // 结果不为空，并且密码和传入的密码是匹配的
         // 如果结果是对的, 则生成token, 并将token存入redis
-        if(loginUser != null){
+        // 将加密过的密码和实际密码进行比对
+        if(loginUser != null && passwordEncoder.matches(user.getPassword(), loginUser.getPassword())){
             // UUID
             String key = "user:" + UUID.randomUUID();
             // 存入redis

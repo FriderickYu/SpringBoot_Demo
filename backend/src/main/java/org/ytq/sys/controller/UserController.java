@@ -3,6 +3,7 @@ package org.ytq.sys.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,8 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private IUserService userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @GetMapping("/all")
     public Encapulation<List<User>>getAllUser(){
         List<User> list = userService.list();
@@ -79,8 +82,28 @@ public class UserController {
 
     @PostMapping
     public Encapulation<?> addUser(@RequestBody User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
         return Encapulation.success("新增用户成功");
+    }
+
+    @PutMapping
+    public Encapulation<?> updateUser(@RequestBody User user){
+        user.setPassword(null);
+        userService.updateById(user);
+        return Encapulation.success("修改用户成功");
+    }
+
+    @GetMapping("/{id}")
+    public Encapulation<User> getUserById(@PathVariable("id") Integer id){
+        User user = userService.getById(id);
+        return Encapulation.success(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public Encapulation<User> deleteUserById(@PathVariable("id") Integer id){
+        userService.removeById(id);
+        return Encapulation.success("删除用户成功");
     }
 
 }

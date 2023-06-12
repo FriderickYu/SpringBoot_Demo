@@ -4,12 +4,12 @@
     <el-card id="search">
       <el-row>
         <el-col :span="20">
-          <el-input v-model="searchModel.username" placeholder="用户名" clearable />
-          <el-input v-model="searchModel.phone" placeholder="电话" clearable />
+          <el-input v-model="searchModel.username" placeholder="用户名" clearable/>
+          <el-input v-model="searchModel.phone" placeholder="电话" clearable/>
           <el-button type="primary" round icon="el-icon-search" @click="getUserList">查询</el-button>
         </el-col>
         <el-col :span="4" align="right">
-          <el-button type="primary" round icon="el-icon-plus" @click="openEditUI" />
+          <el-button type="primary" round icon="el-icon-plus" @click="openEditUI(null)"/>
         </el-col>
       </el-row>
     </el-card>
@@ -22,11 +22,22 @@
             {{ (searchModel.pageNo - 1) * searchModel.pageSize + scope.$index + 1 }}
           </template>
         </el-table-column>
-        <el-table-column prop="id" label="用户id" width="180" />
-        <el-table-column prop="username" label="用户名" width="180" />
-        <el-table-column prop="phone" label="电话" width="180" />
-        <el-table-column prop="email" label="电子邮件" />
-        <el-table-column label="操作" width="180" />
+        <el-table-column prop="id" label="用户id" width="180"/>
+        <el-table-column prop="username" label="用户名" width="180"/>
+        <el-table-column prop="status" label="用户状态" width="180">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.status == 1">正常</el-tag>
+            <el-tag v-else type="danger">禁用</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="phone" label="电话" width="180"/>
+        <el-table-column prop="email" label="电子邮件"/>
+        <el-table-column label="操作" width="180">
+          <template slot-scope="scope">
+            <el-button circle type="primary" icon="el-icon-edit" size="mini" @click="openEditUI(scope.row.id)"/>
+            <el-button circle type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row)"/>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
 
@@ -44,19 +55,21 @@
     <el-dialog :visible.sync="dialogFormVisible" :title="title" @close="clearForm">
       <el-form ref="userFormRef" :model="userForm" :rules="rules">
         <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
-          <el-input v-model="userForm.username" autocomplete="off"></el-input>
+          <el-input v-model="userForm.username" autocomplete="off"/>
         </el-form-item>
-        <el-form-item label="密码" prop="password" :label-width="formLabelWidth">
-          <el-input v-model="userForm.password" type="password" autocomplete="off"></el-input>
+        <el-form-item v-if="userForm.id == null || userForm.id == undefined" label="密码" prop="password"
+                      :label-width="formLabelWidth"
+        >
+          <el-input v-model="userForm.password" type="password" autocomplete="off"/>
         </el-form-item>
         <el-form-item label="电话" :label-width="formLabelWidth">
-          <el-input v-model="userForm.phone" autocomplete="off"></el-input>
+          <el-input v-model="userForm.phone" autocomplete="off"/>
         </el-form-item>
         <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
-          <el-input v-model="userForm.email" autocomplete="off"></el-input>
+          <el-input v-model="userForm.email" autocomplete="off"/>
         </el-form-item>
         <el-form-item label="用户状态" :label-width="formLabelWidth">
-          <el-switch v-model="userForm.status" active-value="1" inactive-value="0"></el-switch>
+          <el-switch v-model="userForm.status" active-value="1" inactive-value="0"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -112,12 +125,32 @@ export default {
     this.getUserList()
   },
   methods: {
+    deleteUser(user) {
+      this.$confirm(`您确认删除用户 ${user.username} ?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        userApi.deleteUserById(user.id).then(response => {
+          this.$message({
+            type: 'success',
+            message: response.message
+          })
+          this.getUserList()
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
     saveUser() {
       // 先触发表单验证
       this.$refs.userFormRef.validate((valid) => {
         if (valid) {
           // 提交请求给后端
-          userApi.addUser(this.userForm).then(response => {
+          userApi.saveUser(this.userForm).then(response => {
             // 成功的提示
             this.$message({
               message: response.message,
@@ -138,8 +171,16 @@ export default {
       this.userForm = {}
       this.$refs.userFormRef.clearValidate()
     },
-    openEditUI() {
-      this.title = '新增用户'
+    openEditUI(id) {
+      if (id == null) {
+        this.title = '新增用户'
+      } else {
+        this.title = '修改用户'
+        // 根据id查询用户
+        userApi.getUserById(id).then(response => {
+          this.userForm = response.data
+        })
+      }
       this.dialogFormVisible = true
     },
     handleSizeChange(pageSize) {
