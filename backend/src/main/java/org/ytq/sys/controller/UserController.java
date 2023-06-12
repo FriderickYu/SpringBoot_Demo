@@ -18,8 +18,10 @@ import java.util.Map;
  * @author yutianqi
  * @since 2023-06-07
  */
+
 @RestController
 @RequestMapping("/user")
+
 public class UserController {
     @Autowired
     private IUserService userService;
