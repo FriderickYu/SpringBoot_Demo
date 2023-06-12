@@ -1,12 +1,16 @@
 package org.ytq.sys.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.ytq.sys.entity.User;
 import org.ytq.sys.service.IUserService;
 import org.ytq.vo.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +59,28 @@ public class UserController {
     public Encapulation<?> logout(@RequestHeader("X-Token") String token){
         userService.logout(token);
         return Encapulation.success();
+    }
+
+    @GetMapping("/list")
+    public Encapulation<Map<String, Object>> getUserList(@RequestParam(value = "username", required = false) String username,
+                                                     @RequestParam(value = "phone", required = false) String phone,
+                                                     @RequestParam(value = "pageNo") Long pageNo,
+                                                     @RequestParam(value = "pageSize") Long pageSize){
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(StringUtils.hasLength(username), User::getUsername, username);
+        wrapper.eq(StringUtils.hasLength(phone), User::getPhone, phone);
+        Page<User> pages = new Page<>(pageNo, pageSize);
+        userService.page(pages, wrapper);
+        Map<String, Object> data = new HashMap<>();
+        data.put("total", pages.getTotal());
+        data.put("rows", pages.getRecords());
+        return Encapulation.success(data);
+    }
+
+    @PostMapping
+    public Encapulation<?> addUser(@RequestBody User user){
+        userService.save(user);
+        return Encapulation.success("新增用户成功");
     }
 
 }
