@@ -101,7 +101,7 @@ export const constantRoutes = [
         name: 'test3',
         component: () => import('@/views/test/test3'),
         meta: { title: '功能点三', icon: 'form' }
-      },
+      }
     ]
   },
 

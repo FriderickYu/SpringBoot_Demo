@@ -1,9 +1,9 @@
 package org.ytq;
 
+import org.ytq.sys.entity.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.ytq.sys.entity.User;
-import org.ytq.sys.mapper.UserMapper;
+import org.ytq.sys.mapper.*;
 
 import javax.annotation.Resource;
 import java.util.List;

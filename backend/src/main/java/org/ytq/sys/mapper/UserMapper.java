@@ -1,6 +1,6 @@
 package org.ytq.sys.mapper;
 
-import org.ytq.sys.entity.User;
+import org.ytq.sys.entity.*;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.List;

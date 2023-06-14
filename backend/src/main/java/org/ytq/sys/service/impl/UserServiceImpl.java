@@ -10,6 +10,7 @@ import org.ytq.sys.mapper.UserMapper;
 import org.ytq.sys.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.ytq.utils.JwtUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private RedisTemplate redisTemplate;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
     // 用户登录具体的逻辑
     @Override
     public Map<String, Object> login(User user) {
@@ -44,14 +47,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 将加密过的密码和实际密码进行比对
         if(loginUser != null && passwordEncoder.matches(user.getPassword(), loginUser.getPassword())){
             // UUID
-            String key = "user:" + UUID.randomUUID();
+            // String key = "user:" + UUID.randomUUID();
             // 存入redis
-            loginUser.setPassword(null);
-            redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);
+             loginUser.setPassword(null);
+            // redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);
             // 返回数据
 
+            // 创建jwt
+            String token = jwtUtil.createToken(loginUser);
+
             Map<String, Object> data = new HashMap<>();
-            data.put("token", key);
+            data.put("token", token);
             return data;
         }
         return null;
@@ -60,9 +66,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public Map<String, Object> getUserInfo(String token) {
         // 根据token获取用户信息, redis
-        Object object = redisTemplate.opsForValue().get(token);
-        if(object != null){
-            User loginUser = JSON.parseObject(JSON.toJSONString(object), User.class);
+        // Object object = redisTemplate.opsForValue().get(token);
+        User loginUser = null;
+        try {
+            loginUser = jwtUtil.parseToken(token, User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(loginUser != null){
+            // User loginUser = JSON.parseObject(JSON.toJSONString(object), User.class);
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("name", loginUser.getUsername());
             hashMap.put("avatar", loginUser.getAvatar());
@@ -76,6 +88,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void logout(String token) {
-        redisTemplate.delete(token);
+        // redisTemplate.delete(token);
     }
 }

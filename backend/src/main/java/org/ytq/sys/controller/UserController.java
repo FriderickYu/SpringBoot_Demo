@@ -2,14 +2,15 @@ package org.ytq.sys.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
 import org.ytq.sys.entity.User;
 import org.ytq.sys.service.IUserService;
-import org.ytq.vo.*;
+import org.ytq.vo.Encapulation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Map;
  * @since 2023-06-07
  */
 
+@Api(tags = {"用户接口列表"})
 @RestController
 @RequestMapping("/user")
 
@@ -39,6 +41,7 @@ public class UserController {
     }
 
     // 登录接口
+    @ApiOperation("用户登录")
     @PostMapping("/login")
     public Encapulation<Map<String, Object>> login(@RequestBody User user){
         Map<String, Object> data = userService.login(user);

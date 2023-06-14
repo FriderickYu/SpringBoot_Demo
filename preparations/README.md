@@ -66,6 +66,8 @@ SpringBoot框架版本: 2.7.8
 * `fastjson2`, 版本: 2.0.7
 * `spring-security-core`
 * `spring-security-core`
+* `jjwt`, 版本: 0.9.1
+* `springfox-boot-starter`, 版本: 3.0.0
 
 ## Element UI
 
