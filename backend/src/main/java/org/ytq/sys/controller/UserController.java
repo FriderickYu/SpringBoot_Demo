@@ -93,7 +93,7 @@ public class UserController {
     @PutMapping
     public Encapulation<?> updateUser(@RequestBody User user){
         user.setPassword(null);
-        userService.updateById(user);
+        userService.updateUser(user);
         return Encapulation.success("修改用户成功");
     }
 
@@ -105,7 +105,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public Encapulation<User> deleteUserById(@PathVariable("id") Integer id){
-        userService.removeById(id);
+        userService.deleteUserById(id);
         return Encapulation.success("删除用户成功");
     }
 

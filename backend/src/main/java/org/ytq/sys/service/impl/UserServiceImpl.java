@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.ytq.sys.entity.Menu;
 import org.ytq.sys.entity.User;
 import org.ytq.sys.entity.UserRole;
 import org.ytq.sys.mapper.UserMapper;
 import org.ytq.sys.mapper.UserRoleMapper;
+import org.ytq.sys.service.IMenuService;
 import org.ytq.sys.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private JwtUtil jwtUtil;
     @Resource
     private UserRoleMapper userRoleMapper;
+    @Autowired
+    private IMenuService iMenuService;
     // 用户登录具体的逻辑
     @Override
     public Map<String, Object> login(User user) {
@@ -88,6 +92,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 角色
             List<String> roleList = this.baseMapper.getRoleNameByUserId(loginUser.getId());
             hashMap.put("roles", roleList);
+
+            // 验证通过成功后，获取权限列表
+            List<Menu> menuList = iMenuService.getMenuListByUserId(loginUser.getId());
+            hashMap.put("menuList", menuList);
             return hashMap;
         }
         return null;
@@ -126,5 +134,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setRoleIdList(roleIdList);
 
         return user;
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(User user) {
+        // 更新用户表本身
+        this.baseMapper.updateById(user);
+        // 清除原有的角色
+        LambdaQueryWrapper<UserRole> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserRole::getUserId, user.getId());
+        userRoleMapper.delete(queryWrapper);
+        // 设置新的角色
+        List<Integer> roleIdList = user.getRoleIdList();
+        if(roleIdList != null){
+            for (Integer roleId : roleIdList) {
+                userRoleMapper.insert(new UserRole(null, user.getId(), roleId));
+            }
+        }
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        // 清楚原有的角色
+        this.baseMapper.deleteById(id);
+        LambdaQueryWrapper<UserRole> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserRole::getUserId, id);
+        userRoleMapper.delete(queryWrapper);
     }
 }
