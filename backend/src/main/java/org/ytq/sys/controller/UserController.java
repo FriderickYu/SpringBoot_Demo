@@ -86,7 +86,7 @@ public class UserController {
     @PostMapping
     public Encapulation<?> addUser(@RequestBody User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.save(user);
+        userService.addUser(user);
         return Encapulation.success("新增用户成功");
     }
 
@@ -99,7 +99,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public Encapulation<User> getUserById(@PathVariable("id") Integer id){
-        User user = userService.getById(id);
+        User user = userService.getUserById(id);
         return Encapulation.success(user);
     }
 

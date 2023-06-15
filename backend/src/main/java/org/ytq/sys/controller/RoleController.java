@@ -55,7 +55,7 @@ public class RoleController {
 
     @PutMapping
     public Encapulation<?> updateRole(@RequestBody Role role){
-        roleService.updateById(role);
+        roleService.updateRole(role);
         return Encapulation.success("修改角色成功");
     }
 
@@ -67,8 +67,14 @@ public class RoleController {
 
     @DeleteMapping("/{id}")
     public Encapulation<Role> deleteRoleById(@PathVariable("id") Integer id){
-        roleService.removeById(id);
+        roleService.deleteRoleById(id);
         return Encapulation.success("删除角色成功");
+    }
+
+    @GetMapping("/all")
+    public Encapulation<List<Role>> getAllRole(){
+        List<Role> roleList = roleService.list();
+        return Encapulation.success(roleList);
     }
 
 }

@@ -4,12 +4,12 @@
     <el-card id="search">
       <el-row>
         <el-col :span="20">
-          <el-input v-model="searchModel.username" placeholder="用户名" clearable/>
-          <el-input v-model="searchModel.phone" placeholder="电话" clearable/>
+          <el-input v-model="searchModel.username" placeholder="用户名" clearable />
+          <el-input v-model="searchModel.phone" placeholder="电话" clearable />
           <el-button type="primary" round icon="el-icon-search" @click="getUserList">查询</el-button>
         </el-col>
         <el-col :span="4" align="right">
-          <el-button type="primary" round icon="el-icon-plus" @click="openEditUI(null)"/>
+          <el-button type="primary" round icon="el-icon-plus" @click="openEditUI(null)" />
         </el-col>
       </el-row>
     </el-card>
@@ -22,20 +22,20 @@
             {{ (searchModel.pageNo - 1) * searchModel.pageSize + scope.$index + 1 }}
           </template>
         </el-table-column>
-        <el-table-column prop="id" label="用户id" width="180"/>
-        <el-table-column prop="username" label="用户名" width="180"/>
+        <el-table-column prop="id" label="用户id" width="180" />
+        <el-table-column prop="username" label="用户名" width="180" />
         <el-table-column prop="status" label="用户状态" width="180">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status == 1">正常</el-tag>
             <el-tag v-else type="danger">禁用</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="phone" label="电话" width="180"/>
-        <el-table-column prop="email" label="电子邮件"/>
+        <el-table-column prop="phone" label="电话" width="180" />
+        <el-table-column prop="email" label="电子邮件" />
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button circle type="primary" icon="el-icon-edit" size="mini" @click="openEditUI(scope.row.id)"/>
-            <el-button circle type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row)"/>
+            <el-button circle type="primary" icon="el-icon-edit" size="mini" @click="openEditUI(scope.row.id)" />
+            <el-button circle type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row)" />
           </template>
         </el-table-column>
       </el-table>
@@ -55,21 +55,33 @@
     <el-dialog :visible.sync="dialogFormVisible" :title="title" @close="clearForm">
       <el-form ref="userFormRef" :model="userForm" :rules="rules">
         <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
-          <el-input v-model="userForm.username" autocomplete="off"/>
+          <el-input v-model="userForm.username" autocomplete="off" />
         </el-form-item>
-        <el-form-item v-if="userForm.id == null || userForm.id == undefined" label="密码" prop="password"
-                      :label-width="formLabelWidth"
+        <el-form-item
+          v-if="userForm.id == null || userForm.id == undefined"
+          label="密码"
+          prop="password"
+          :label-width="formLabelWidth"
         >
-          <el-input v-model="userForm.password" type="password" autocomplete="off"/>
+          <el-input v-model="userForm.password" type="password" autocomplete="off" />
         </el-form-item>
         <el-form-item label="电话" :label-width="formLabelWidth">
-          <el-input v-model="userForm.phone" autocomplete="off"/>
+          <el-input v-model="userForm.phone" autocomplete="off" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email" :label-width="formLabelWidth">
-          <el-input v-model="userForm.email" autocomplete="off"/>
+          <el-input v-model="userForm.email" autocomplete="off" />
         </el-form-item>
         <el-form-item label="用户状态" :label-width="formLabelWidth">
-          <el-switch v-model="userForm.status" active-value="1" inactive-value="0"/>
+          <el-switch v-model="userForm.status" active-value="1" inactive-value="0" />
+        </el-form-item>
+        <el-form-item label="用户角色" :label-width="formLabelWidth">
+          <el-checkbox-group
+            v-model="userForm.roleIdList"
+            style="width: 85%"
+            :max="2"
+          >
+            <el-checkbox v-for="role in roleList" :key="role.roleId" :label="role.roleId">{{ role.roleDesc }}</el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -82,7 +94,7 @@
 
 <script>
 import userApi from '@/api/userMange'
-
+import roleApi from '@/api/roleMange'
 export default {
   data() {
     // 邮箱验证
@@ -95,8 +107,11 @@ export default {
       callback()
     }
     return {
+      roleList: [],
       formLabelWidth: '130px',
-      userForm: {},
+      userForm: {
+        roleIdList: []
+      },
       dialogFormVisible: false,
       title: '',
       total: 0,
@@ -123,8 +138,14 @@ export default {
   },
   created() {
     this.getUserList()
+    this.getAllRoleList()
   },
   methods: {
+    getAllRoleList() {
+      roleApi.getAllRoleList().then(response => {
+        this.roleList = response.data
+      })
+    },
     deleteUser(user) {
       this.$confirm(`您确认删除用户 ${user.username} ?`, '提示', {
         confirmButtonText: '确定',
@@ -168,7 +189,9 @@ export default {
       })
     },
     clearForm() {
-      this.userForm = {}
+      this.userForm = {
+        roleIdList: []
+      }
       this.$refs.userFormRef.clearValidate()
     },
     openEditUI(id) {

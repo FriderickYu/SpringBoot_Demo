@@ -5,18 +5,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.ytq.sys.entity.User;
+import org.ytq.sys.entity.UserRole;
 import org.ytq.sys.mapper.UserMapper;
+import org.ytq.sys.mapper.UserRoleMapper;
 import org.ytq.sys.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.ytq.utils.JwtUtil;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -34,6 +39,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtil jwtUtil;
+    @Resource
+    private UserRoleMapper userRoleMapper;
     // 用户登录具体的逻辑
     @Override
     public Map<String, Object> login(User user) {
@@ -89,5 +96,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void logout(String token) {
         // redisTemplate.delete(token);
+    }
+
+    @Override
+    @Transactional
+    public void addUser(User user) {
+        // 写入用户表
+        this.baseMapper.insert(user);
+        // 写入用户角色表
+        List<Integer> roleIdList = user.getRoleIdList();
+        if(roleIdList != null){
+            for (Integer roleId : roleIdList) {
+                userRoleMapper.insert(new UserRole(null, user.getId(), roleId));
+            }
+        }
+    }
+
+    @Override
+    public User getUserById(Integer id) {
+        User user = this.baseMapper.selectById(id);
+
+        LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserRole::getUserId,id);
+        List<UserRole> userRoleList = userRoleMapper.selectList(wrapper);
+
+        List<Integer> roleIdList = userRoleList.stream()
+                .map(UserRole::getRoleId)
+                .collect(Collectors.toList());
+        user.setRoleIdList(roleIdList);
+
+        return user;
     }
 }
